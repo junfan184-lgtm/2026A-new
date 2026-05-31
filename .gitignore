@@ -1,0 +1,39 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.xdv
+
+# Editor and TeX temporary files
+*.bak
+*.tmp
+*.swp
+*.synctex.gz(busy)
+*~
+
+# Local backups
+*_backup.*
+*_local_backup.*
+latex/main_local_backup.pdf
+
+# Python caches, if scripts are used for data processing
+__pycache__/
+*.py[cod]
+
+# OS/editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
