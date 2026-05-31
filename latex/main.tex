@@ -343,7 +343,21 @@ X_j^{(\tau)}(t)=X_j(t-\tau),
 \end{equation}
 分别对应 0 s、2 s、6 s、10 s、20 s、28 s、40 s、60 s 和 80 s。对任一变量 $X_j$，计算其在不同滞后步数下与当前 \CO 浓度的相关系数：
 \begin{equation}
-r_{j,\tau}=\operatorname{corr}\left(X_j(t-\tau),C(t)\right),\quad \tau\in\mathcal{T}.
+\begin{aligned}
+r_{j,\tau}
+&=\operatorname{corr}\left(X_j(t-\tau),C(t)\right)\\
+&=
+\frac{
+\sum_{t=\tau+1}^{n}
+\left[X_j(t-\tau)-\overline{X_j^{(\tau)}}\right]
+\left[C(t)-\overline C\right]
+}{
+\sqrt{\sum_{t=\tau+1}^{n}
+\left[X_j(t-\tau)-\overline{X_j^{(\tau)}}\right]^2}
+\sqrt{\sum_{t=\tau+1}^{n}
+\left[C(t)-\overline C\right]^2}
+},\quad \tau\in\mathcal{T}.
+\end{aligned}
 \end{equation}
 在候选集合中选取相关性绝对值最大的滞后步数作为该变量的数据配准结果：
 \begin{equation}
