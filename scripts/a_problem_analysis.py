@@ -508,18 +508,21 @@ def run_pressure_optimization(df: pd.DataFrame) -> pd.DataFrame:
     opt_df.to_csv(OUTPUT_DIR / "11_典型工况CO优化效果.csv", encoding="utf-8-sig", index=False)
     profile_df.to_csv(OUTPUT_DIR / "12_典型工况推荐负压.csv", encoding="utf-8-sig", index=False)
 
-    fig, ax = plt.subplots(figsize=(14, 6))
+    fig, ax = plt.subplots(figsize=(12, 7.5))
     for scenario in candidates:
         sub = profile_df[profile_df["工况"] == scenario]
-        ax.plot(range(1, 19), sub["推荐负压"], marker="o", linewidth=1.3, label=f"{scenario} 推荐")
-    ax.plot(range(1, 19), bounds_df["中位数"], color="#111827", linestyle="--", linewidth=1.2, label="历史中位数")
-    ax.fill_between(range(1, 19), bounds_df["5%分位"], bounds_df["95%分位"], color="#93c5fd", alpha=0.25, label="5%-95%范围")
-    ax.set_title("典型工况风箱负压推荐曲线")
-    ax.set_xlabel("风箱编号")
-    ax.set_ylabel("负压 KPa")
-    ax.legend(ncol=2, fontsize=9)
+        ax.plot(range(1, 19), sub["推荐负压"], marker="o", linewidth=3.0, markersize=9, label=scenario)
+    ax.plot(range(1, 19), bounds_df["中位数"], color="#111827", linestyle="--", linewidth=2.6, label="历史中位数")
+    ax.fill_between(range(1, 19), bounds_df["5%分位"], bounds_df["95%分位"], color="#93c5fd", alpha=0.28, label="5%-95%范围")
+    ax.set_xlabel("风箱编号", fontsize=19)
+    ax.set_ylabel("负压 KPa", fontsize=19)
+    ax.tick_params(axis="both", labelsize=24)
+    handles, labels = ax.get_legend_handles_labels()
+    order = [0, 2, 1, 3, 4]
+    ax.legend([handles[i] for i in order], [labels[i] for i in order], ncol=2, fontsize=22, frameon=True)
+    ax.grid(True, linewidth=1.0, alpha=0.55)
     fig.tight_layout()
-    fig.savefig(FIG_DIR / "06_典型工况推荐负压曲线.png", dpi=180)
+    fig.savefig(FIG_DIR / "06_典型工况推荐负压曲线.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     return opt_df
 
