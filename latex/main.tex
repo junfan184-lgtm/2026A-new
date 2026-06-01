@@ -155,7 +155,7 @@
 
 \section{符号说明}
 
-\begin{longtable}{c p{9cm} c}
+\begin{longtable}{@{}>{\centering\arraybackslash}p{4.2cm} p{7.6cm} >{\centering\arraybackslash}p{2.0cm}@{}}
 \caption{主要符号说明}\\
 \toprule
 符号 & 含义 & 单位 \\
@@ -168,15 +168,20 @@
 \endhead
 \bottomrule
 \endfoot
-$t$ & 时间序号，相邻时刻间隔 2 s & -- \\
-$P_i(t)$ & 第 $i$ 个风箱在 $t$ 时刻的负压 & \kpa \\
-$T_i(t)$ & 第 $i$ 个风箱南北侧平均温度 & $^\circ$C \\
-$C(t)$ & 大烟道外排 \CO 浓度 & mg/m$^3$ \\
-$v(t)$ & 烧结机机速设定值 & m/min \\
-$D(t)$ & 大烟道负压和温度等状态变量 & -- \\
-$\tau$ & 滞后步数 & 2 s/步 \\
-$\hat C(t)$ & 模型预测的 \CO 浓度 & mg/m$^3$ \\
-$\mathbf P$ & 18 个风箱负压组成的向量 & \kpa \\
+$P_i(t)$ & 第 $i$ 个风箱在 $t$ 时刻的负压；优化固定工况时简写为 $P_i$ & \kpa \\
+$P_i^0,\tilde P_i^0$ & 第 $i$ 个风箱当前负压及其截断到历史分位范围后的参考值 & \kpa \\
+$P_i^{5\%},P_i^{95\%}$ & 第 $i$ 个风箱负压的历史 5\% 和 95\% 分位数 & \kpa \\
+$T_{i,S}(t),T_{i,N}(t)$ & 第 $i$ 个风箱在 $t$ 时刻的南侧、北侧温度 & $^\circ$C \\
+$T_i(t),\hat T_i(t)$ & 第 $i$ 个风箱南北侧平均温度及其预测值 & $^\circ$C \\
+$C(t),\hat C(t)$ & $t$ 时刻大烟道外排 \CO 浓度及其预测值 & mg/m$^3$ \\
+$X_j(t),X_j^{(\tau)}(t)$ & 第 $j$ 个工艺变量及其滞后 $\tau$ 步配准后的序列 & -- \\
+$\mathbf x_i(t),\mathbf{x}(t)$ & 温度预测模型和 \CO 预测模型的输入特征向量 & -- \\
+$\mathbf Z$ & 优化时固定的给定工况，包括机速、温度和大烟道状态 & -- \\
+$\mathcal S_i$ & 第 $i$ 个风箱温度模型采用的输入风箱集合 & -- \\
+$\mathcal T,\mathcal T_C$ & 候选滞后步数集合及历史 \CO 滞后步数集合 & 步 \\
+$\overline{X_j^{(\tau)}},\overline C$ & 滞后变量和 \CO 浓度的样本均值 & -- \\
+$\mathbf P,\mathbf P^*$ & 18 个风箱负压组成的优化向量及推荐负压向量 & \kpa \\
+$\Omega,J(\mathbf P)$ & 风箱负压优化搜索范围和优化目标函数 & -- \\
 \end{longtable}
 
 \section{模型的建立与求解}
@@ -212,14 +217,14 @@ $\mathbf P$ & 18 个风箱负压组成的向量 & \kpa \\
 ]
 \node[rolebox=blue!7] (q1) {
   {\centering\heiti 问题一\par}\vspace{3pt}
-  {\heiti 输入：}风箱负压 $P_i$\\
-  {\heiti 目标：}风箱温度 $T_i$\\
+  {\heiti 输入：}风箱负压 $P_i(t)$\\
+  {\heiti 目标：}风箱温度 $T_i(t)$\\
   {\heiti 准备：}合并南北侧温度，整理负压与温度的对应关系
 };
 \node[rolebox=green!8, right=0.65cm of q1] (q2) {
   {\centering\heiti 问题二\par}\vspace{3pt}
-  {\heiti 输入：}$P_i$、$T_i$、大烟道参数\\
-  {\heiti 目标：}外排 \CO 浓度 $C$\\
+  {\heiti 输入：}$P_i(t)$、$T_i(t)$、大烟道参数\\
+  {\heiti 目标：}外排 \CO 浓度 $C(t)$\\
   {\heiti 准备：}按风箱位置构造时滞配准变量
 };
 \node[rolebox=orange!10, right=0.65cm of q2] (q3) {
@@ -463,7 +468,7 @@ r_{j,\tau}
 首先建立实时监测模型，将历史 \CO 项与配准后的变量共同作为输入。为使历史 \CO 项的采样方式与前文数据配准保持一致，记
 $\mathcal{T}_{C}=\mathcal{T}\setminus\{0\}$，其中 0 阶滞后对应当前待预测的 $C(t)$，此时不作为输入变量：
 \begin{equation}
-\hat C_{\mathrm{mon}}(t)
+\hat C(t)
 =
 g_{\mathrm{mon}}
 \left(
@@ -521,11 +526,11 @@ g_{\mathrm{mon}}
 
 在建立负压优化模型之前，需要先对 \CO 浓度中的异常候选点进行处理。由于问题三的目标是根据正常生产数据寻找可执行的负压调控方案，若将极端 \CO 样本直接用于调控模型训练，模型可能会把非稳态波动或检测异常误认为负压变化造成的结果，从而影响后续优化方向。
 
-那么根据 \CO 浓度的实际分布和生产排放水平，将过低和过高的 \CO 观测值作为异常候选点进行标记。设第 $t$ 个时刻的 \CO 浓度为 $C_t$，异常候选点定义为
+那么根据 \CO 浓度的实际分布和生产排放水平，将过低和过高的 \CO 观测值作为异常候选点进行标记。设第 $t$ 个时刻的 \CO 浓度为 $C(t)$，异常候选点定义为
 \begin{equation}
 I_t=
 \begin{cases}
-1, & C_t<1000 \ \text{或}\ C_t>6000,\\
+1, & C(t)<1000 \ \text{或}\ C(t)>6000,\\
 0, & \text{其他情况}.
 \end{cases}
 \end{equation}
@@ -572,7 +577,7 @@ I_t=
 步骤 & 处理内容 & 结果 \\
 \midrule
 1 & 固定机速、风箱温度和大烟道状态 & $\mathbf Z$ \\
-2 & 提取当前 18 个风箱负压 & $\mathbf P_i$ \\
+2 & 提取当前 18 个风箱负压 & $P_i^0$ \\
 3 & 根据历史 5\%-95\% 分位和当前工况邻域确定搜索范围 & $\Omega$ \\
 4 & 构造预测 \CO 浓度、调节幅度和平滑约束组成的目标函数 & $J(\mathbf P)$ \\
 5 & 采用差分进化算法在搜索区间内求解 & $\mathbf P^*$ \\
